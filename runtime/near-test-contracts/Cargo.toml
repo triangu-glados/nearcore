@@ -11,3 +11,6 @@ license = "Apache-2.0"
 [dependencies]
 once_cell = "1"
 wat = "1.0.40"
+wasm-smith = { git = "https://github.com/nagisa/wasm-tools.git", rev = "9ff71bffffa8e4acdce7bf3b17252edd30f276e4" }
+rand = { version = "0.8", features = ["small_rng"] }
+arbitrary = "1.1"

@@ -306,9 +306,9 @@ dependencies = [
 
 [[package]]
 name = "arbitrary"
-version = "1.0.2"
+version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "577b08a4acd7b99869f863c50011b01eb73424ccc798ecd996f2e24817adfca7"
+checksum = "c38b6b6b79f671c25e1a3e785b7b82d7562ffc9cd3efdc98627e5668a2472490"
 dependencies = [
  "derive_arbitrary",
 ]
@@ -3207,7 +3207,10 @@ dependencies = [
 name = "near-test-contracts"
 version = "0.0.0"
 dependencies = [
+ "arbitrary",
  "once_cell",
+ "rand 0.8.4",
+ "wasm-smith 0.9.1 (git+https://github.com/nagisa/wasm-tools.git?rev=9ff71bffffa8e4acdce7bf3b17252edd30f276e4)",
  "wat",
 ]
 
@@ -3290,7 +3293,7 @@ dependencies = [
  "near-primitives",
  "near-vm-logic",
  "near-vm-runner",
- "wasm-smith",
+ "wasm-smith 0.9.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "wasmprinter",
 ]
 
@@ -5829,6 +5832,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "wasm-encoder"
+version = "0.10.0"
+source = "git+https://github.com/nagisa/wasm-tools.git?rev=9ff71bffffa8e4acdce7bf3b17252edd30f276e4#9ff71bffffa8e4acdce7bf3b17252edd30f276e4"
+dependencies = [
+ "leb128",
+]
+
+[[package]]
 name = "wasm-smith"
 version = "0.9.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5838,7 +5849,20 @@ dependencies = [
  "flagset",
  "indexmap",
  "leb128",
- "wasm-encoder",
+ "wasm-encoder 0.10.0 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "wasm-smith"
+version = "0.9.1"
+source = "git+https://github.com/nagisa/wasm-tools.git?rev=9ff71bffffa8e4acdce7bf3b17252edd30f276e4#9ff71bffffa8e4acdce7bf3b17252edd30f276e4"
+dependencies = [
+ "arbitrary",
+ "flagset",
+ "indexmap",
+ "leb128",
+ "wasm-encoder 0.10.0 (git+https://github.com/nagisa/wasm-tools.git?rev=9ff71bffffa8e4acdce7bf3b17252edd30f276e4)",
+ "wasmparser 0.83.0",
 ]
 
 [[package]]
@@ -6043,6 +6067,14 @@ name = "wasmparser"
 version = "0.81.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "98930446519f63d00a836efdc22f67766ceae8dbcc1571379f2bcabc6b2b9abc"
+
+[[package]]
+name = "wasmparser"
+version = "0.83.0"
+source = "git+https://github.com/nagisa/wasm-tools.git?rev=9ff71bffffa8e4acdce7bf3b17252edd30f276e4#9ff71bffffa8e4acdce7bf3b17252edd30f276e4"
+dependencies = [
+ "indexmap",
+]
 
 [[package]]
 name = "wasmprinter"
