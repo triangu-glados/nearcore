@@ -8,7 +8,6 @@ use pwasm_utils::parity_wasm::elements::{self, External, MemorySection};
 
 pub(crate) const WASM_FEATURES: wasmparser::WasmFeatures = wasmparser::WasmFeatures {
     reference_types: false,
-    // wasmer singlepass compiler most likely requires multi_value return values to be disabled.
     multi_value: false,
     bulk_memory: false,
     module_linking: false,
