@@ -146,11 +146,6 @@ fn init_logging() {
 
 fn main() {
     init_logging();
-    let orig_hook = std::panic::take_hook();
-    std::panic::set_hook(Box::new(move |panic_info| {
-        orig_hook(panic_info);
-        std::process::exit(1);
-    }));
     openssl_probe::init_ssl_cert_env_vars();
     if let Err(e) = Cmd::parse_and_run() {
         error!("Cmd::parse_and_run(): {:#}", e);
