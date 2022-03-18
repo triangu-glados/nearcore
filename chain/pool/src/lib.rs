@@ -51,7 +51,7 @@ impl TransactionPool {
             return false;
         }
         let backtrace = Backtrace::new();
-        println!("Added a transaction: {:?}",backtrace);
+        println!("Added a transaction. unique_transactions: {}\n{:?}",self.unique_transactions.len(),backtrace);
         metrics::TRANSACTION_POOL_TOTAL.inc();
 
         let signer_id = &signed_transaction.transaction.signer_id;
@@ -96,7 +96,7 @@ impl TransactionPool {
             for hash in &hashes {
                 if self.unique_transactions.remove(&hash) {
                     let backtrace = Backtrace::new();
-                    println!("Removed a transaction: {:?}",backtrace);
+                    println!("Removed a transaction. unique_transactions: {}\n{:?}",self.unique_transactions.len(),backtrace);
                     metrics::TRANSACTION_POOL_TOTAL.dec();
                 }
             }
@@ -185,7 +185,7 @@ impl<'a> PoolIterator for PoolIteratorWrapper<'a> {
                     for hash in sorted_group.removed_transaction_hashes {
                         if self.pool.unique_transactions.remove(&hash) {
                             let backtrace = Backtrace::new();
-                            println!("Removed a transaction: {:?}",backtrace);
+                            println!("Removed a transaction. unique_transactions: {}\n{:?}",self.unique_transactions.len(),backtrace);
                             metrics::TRANSACTION_POOL_TOTAL.dec();
                         }
                     }
@@ -208,7 +208,7 @@ impl<'a> Drop for PoolIteratorWrapper<'a> {
             for hash in group.removed_transaction_hashes {
                 if self.pool.unique_transactions.remove(&hash) {
                     let backtrace = Backtrace::new();
-                    println!("Removed a transaction: {:?}",backtrace);
+                    println!("Removed a transaction. unique_transactions: {}\n{:?}",self.unique_transactions.len(),backtrace);
                     metrics::TRANSACTION_POOL_TOTAL.dec();
                 }
             }
