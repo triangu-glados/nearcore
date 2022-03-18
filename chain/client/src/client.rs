@@ -1461,6 +1461,7 @@ impl Client {
                    validator,
                    shard_id
             );
+            println!("Routing at {:?}",backtrace::Backtrace::new());
 
             // Send message to network to actually forward transaction.
             self.network_adapter.do_send(PeerManagerMessageRequest::NetworkRequests(
