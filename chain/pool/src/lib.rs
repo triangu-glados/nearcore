@@ -8,6 +8,7 @@ use near_primitives::hash::{hash, CryptoHash};
 use near_primitives::transaction::SignedTransaction;
 use near_primitives::types::AccountId;
 use std::ops::Bound;
+use backtrace::Backtrace;
 
 mod metrics;
 pub mod types;
@@ -49,6 +50,8 @@ impl TransactionPool {
             // The hash of this transaction was already seen, skip it.
             return false;
         }
+        let backtrace = Backtrace::new();
+        println!("Added a transaction: {:?}",backtrace);
         metrics::TRANSACTION_POOL_TOTAL.inc();
 
         let signer_id = &signed_transaction.transaction.signer_id;
@@ -92,6 +95,8 @@ impl TransactionPool {
             }
             for hash in &hashes {
                 if self.unique_transactions.remove(&hash) {
+                    let backtrace = Backtrace::new();
+                    println!("Removed a transaction: {:?}",backtrace);
                     metrics::TRANSACTION_POOL_TOTAL.dec();
                 }
             }
@@ -179,6 +184,8 @@ impl<'a> PoolIterator for PoolIteratorWrapper<'a> {
                 if sorted_group.transactions.is_empty() {
                     for hash in sorted_group.removed_transaction_hashes {
                         if self.pool.unique_transactions.remove(&hash) {
+                            let backtrace = Backtrace::new();
+                            println!("Removed a transaction: {:?}",backtrace);
                             metrics::TRANSACTION_POOL_TOTAL.dec();
                         }
                     }
@@ -200,6 +207,8 @@ impl<'a> Drop for PoolIteratorWrapper<'a> {
         for group in self.sorted_groups.drain(..) {
             for hash in group.removed_transaction_hashes {
                 if self.pool.unique_transactions.remove(&hash) {
+                    let backtrace = Backtrace::new();
+                    println!("Removed a transaction: {:?}",backtrace);
                     metrics::TRANSACTION_POOL_TOTAL.dec();
                 }
             }

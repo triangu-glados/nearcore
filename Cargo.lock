@@ -2960,6 +2960,7 @@ dependencies = [
 name = "near-pool"
 version = "0.0.0"
 dependencies = [
+ "backtrace",
  "borsh",
  "near-crypto",
  "near-metrics",
