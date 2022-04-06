@@ -7,7 +7,13 @@ edition = "2021"
 rust-version = "1.56.0"
 publish = false
 
+[build-dependencies]
+prost-build = { version = "0.10" }
+
 [dependencies]
+anyhow = "1.0.55"
+prost = "0.10"
+prost-types = "0.10"
 actix = "=0.11.0-beta.2"
 borsh = { version = "0.9", features = ["rc"] }
 bytes = "1"
@@ -35,7 +41,7 @@ near-performance-metrics = { path = "../../utils/near-performance-metrics" }
 near-performance-metrics-macros = { path = "../../utils/near-performance-metrics-macros" }
 near-primitives = { path = "../../core/primitives" }
 near-rate-limiter = { path = "../../utils/near-rate-limiter" }
-near-stable-hasher = { path = "../../utils/near-stable-hasher", optional = true }
+near-stable-hasher = { path = "../../utils/near-stable-hasher"}
 near-store = { path = "../../core/store" }
 
 [dev-dependencies]
@@ -56,7 +62,6 @@ performance_stats = [
 ]
 protocol_feature_routing_exchange_algorithm = [
     "near-primitives/protocol_feature_routing_exchange_algorithm",
-    "near-stable-hasher",
 ]
 sandbox = ["near-network-primitives/sandbox"]
 test_features = [

@@ -5,14 +5,8 @@ message PublicKey {
   bytes borsh = 1;
 }
 
-message SocketAddr {
-  bytes borsh = 1;
-}
-
 message PeerInfo {
-  PublicKey id = 1;
-  SocketAddr addr = 2;
-  string account_id = 3;
+  bytes borsh = 1;
 }
 
 message CryptoHash {
@@ -57,7 +51,7 @@ message PeerChainInfo {
 
 message Handshake {
   uint32 protocol_version = 1;
-  uint32 oldest_protocol_version = 2;
+  uint32 oldest_supported_version = 2;
   PublicKey sender_peer_id = 3;
   PublicKey target_peer_id = 4;
   uint32 sender_listen_port = 5;
@@ -67,10 +61,10 @@ message Handshake {
 
 message HandshakeFailure {
   enum Reason {
-    UNKNOWN = 0,
-    ProtocolVersionMismatch = 1,
-    GenesisMismatch = 2,
-    InvalidTarget = 3,
+    UNKNOWN = 0;
+    ProtocolVersionMismatch = 1;
+    GenesisMismatch = 2;
+    InvalidTarget = 3;
   }
 
   PeerInfo peer_info = 1;
@@ -154,7 +148,7 @@ message RoutingSyncV2 {
 }
 
 message PeerMessage {
-  oneof type {
+  oneof message_type {
     Handshake handshake = 1;
     HandshakeFailure handshake_failure = 2;
     LastEdge last_edge = 3;
@@ -163,23 +157,25 @@ message PeerMessage {
     UpdateNonceRequest update_nonce_request = 5;
     UpdateNonceResponse update_nonce_response = 6;
 
-    PeersRequest peers_request = 5;
-    PeersResponse peers_response = 6;
+    PeersRequest peers_request = 7;
+    PeersResponse peers_response = 8;
     
-    BlockHeadersRequest block_headers_request = 7;
-    BlockHeadersResponse block_headers = 8;
+    BlockHeadersRequest block_headers_request = 9;
+    BlockHeadersResponse block_headers_response = 10;
     
-    BlockRequest block_request = 9;
-    BlockResponse block = 10;
+    BlockRequest block_request = 11;
+    BlockResponse block_response = 12;
     
-    SignedTransaction transaction = 11;
-    RoutedMessage routed = 12;
-    Disconnect disconnect = 13;
-    Challenge challenge = 14;
+    SignedTransaction transaction = 13;
+    RoutedMessage routed = 14;
+    Disconnect disconnect = 15;
+    Challenge challenge = 16;
     
-    EpochSyncRequest epoch_sync_request = 15;
-    EpochSyncResponse epoch_sync_response = 16;
+    EpochSyncRequest epoch_sync_request = 17;
+    EpochSyncResponse epoch_sync_response = 18;
+    EpochSyncFinalizationRequest epoch_sync_finalization_request = 19;
+    EpochSyncFinalizationResponse epoch_sync_finalization_response = 20;
     
-    RoutingSyncV2 routing_table_sync_v2 = 17;
+    RoutingSyncV2 routing_table_sync_v2 = 21;
   }
 }
