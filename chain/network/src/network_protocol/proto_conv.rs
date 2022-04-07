@@ -1,5 +1,5 @@
 /// Contains proto <-> network_protocol conversions. 
-use borsh::{BorshDeserialize, BorshSerialize};
+use borsh::{BorshDeserialize as _, BorshSerialize as _};
 use near_network_primitives::types::{
     Edge, PartialEdgeInfo, PeerChainInfoV2, PeerInfo, RoutedMessage,
 };
@@ -11,8 +11,8 @@ use near_primitives::syncing::{EpochSyncFinalizationResponse, EpochSyncResponse}
 use near_primitives::transaction::SignedTransaction;
 use near_primitives::types::{EpochId};
 use anyhow::{Context,bail};
-use crate::proto;
-use crate::proto::peer_message::{MessageType as ProtoMT};
+use crate::network_protocol::proto;
+use crate::network_protocol::proto::peer_message::{MessageType as ProtoMT};
 use crate::network_protocol::{
     Handshake,
     HandshakeFailureReason,
@@ -324,7 +324,6 @@ impl TryFrom<&PeerMessage> for proto::PeerMessage {
             PeerMessage::Challenge(r) => ProtoMT::Challenge(proto::Challenge{
                 borsh: r.try_to_vec().context("Challenge")?,
             }),
-            PeerMessage::_HandshakeV2 => bail!("_HandshakeV2 is not supported"),
             PeerMessage::EpochSyncRequest(epoch_id) => ProtoMT::EpochSyncRequest(proto::EpochSyncRequest{
                 epoch_id: Some((&epoch_id.0).try_into().context("EpochSyncRequest")?),
             }),

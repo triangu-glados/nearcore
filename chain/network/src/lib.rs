@@ -7,7 +7,6 @@ pub use crate::routing::routing_table_actor::{RoutingTableMessages, RoutingTable
 #[cfg(feature = "test_features")]
 pub use crate::stats::metrics::RECEIVED_INFO_ABOUT_ITSELF;
 
-mod proto_conv;
 mod network_protocol;
 mod peer;
 mod peer_manager;
@@ -22,6 +21,4 @@ pub mod test_utils;
 mod tests;
 pub mod types;
 
-pub mod proto {
-    include!(concat!(env!("OUT_DIR"), "/network.rs"));
-}
+

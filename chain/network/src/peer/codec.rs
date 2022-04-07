@@ -108,7 +108,6 @@ impl Decoder for Codec {
 mod test {
     use crate::peer::codec::{Codec, NETWORK_MESSAGE_MAX_SIZE_BYTES};
     use crate::types::{Handshake, PeerMessage, RoutingTableUpdate};
-    use borsh::{BorshDeserialize, BorshSerialize};
     use bytes::{BufMut, BytesMut};
     use near_crypto::{KeyType, SecretKey};
     use near_network_primitives::types::{
@@ -125,9 +124,9 @@ mod test {
     fn test_codec(msg: PeerMessage) {
         let mut codec = Codec::default();
         let mut buffer = BytesMut::new();
-        codec.encode(msg.try_to_vec().unwrap(), &mut buffer).unwrap();
+        codec.encode(msg.serialize(crate::network_protocol::Mode::Borsh).unwrap(), &mut buffer).unwrap();
         let decoded = codec.decode(&mut buffer).unwrap().unwrap().unwrap();
-        assert_eq!(PeerMessage::try_from_slice(&decoded).unwrap(), msg);
+        assert_eq!(PeerMessage::deserialize(crate::network_protocol::Mode::Borsh,&decoded).unwrap(), msg);
     }
 
     #[test]
