@@ -72,7 +72,10 @@ impl TryFrom<&proto::Handshake> for Handshake {
             oldest_supported_version: p.oldest_supported_version,
             sender_peer_id: (||PeerId::try_from(p.sender_peer_id.as_ref().context("missing")?))().context("sender_peer_id")?,
             target_peer_id: (||PeerId::try_from(p.target_peer_id.as_ref().context("missing")?))().context("target_peer_id")?,
-            sender_listen_port: Some(u16::try_from(p.sender_listen_port).context("sender_listen_port")?),
+            sender_listen_port: {
+                let port = u16::try_from(p.sender_listen_port).context("sender_listen_port")?;
+                if port==0 { None } else { Some(port) }
+            },
             sender_chain_info: (||PeerChainInfoV2::try_from(p.sender_chain_info.as_ref().context("missing")?))().context("sender_chain_info")?,
             partial_edge_info: (||PartialEdgeInfo::try_from(p.partial_edge_info.as_ref().context("missing")?))().context("partial_edge_info")?,
         })

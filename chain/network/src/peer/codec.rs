@@ -124,9 +124,9 @@ mod test {
     fn test_codec(msg: PeerMessage) {
         let mut codec = Codec::default();
         let mut buffer = BytesMut::new();
-        codec.encode(msg.serialize(crate::network_protocol::Mode::Borsh).unwrap(), &mut buffer).unwrap();
+        codec.encode(msg.serialize(crate::network_protocol::Mode::Proto).unwrap(), &mut buffer).unwrap();
         let decoded = codec.decode(&mut buffer).unwrap().unwrap().unwrap();
-        assert_eq!(PeerMessage::deserialize(crate::network_protocol::Mode::Borsh,&decoded).unwrap(), msg);
+        assert_eq!(PeerMessage::deserialize(crate::network_protocol::Mode::Proto,&decoded).unwrap(), msg);
     }
 
     #[test]

@@ -104,6 +104,8 @@ pub(crate) struct PeerActor {
     routed_message_cache: LruCache<(PeerId, PeerIdOrHash, Signature), Instant>,
     /// A helper data structure for limiting reading
     throttle_controller: ThrottleController,
+    /// Whether we detected support for protocol buffers during handshake.
+    protocol_buffers_supported: bool,
 }
 
 impl Debug for PeerActor {
@@ -152,6 +154,33 @@ impl PeerActor {
             peer_counter,
             routed_message_cache: LruCache::new(ROUTED_MESSAGE_CACHE_SIZE),
             throttle_controller,
+            protocol_buffers_supported: false,
+        }
+    }
+
+    fn parse_message(&mut self, msg:&[u8]) -> anyhow::Result<PeerMessage> {
+        if self.peer_status==PeerStatus::Connecting {
+            if let Ok(msg) = PeerMessage::deserialize(crate::network_protocol::Mode::Proto,msg) {
+                self.protocol_buffers_supported = true;
+                return Ok(msg);
+            }
+            return match PeerMessage::deserialize(crate::network_protocol::Mode::Borsh,msg) {
+                Ok(msg) => Ok(msg),
+                Err(err) => {
+                    self.send_message_or_log(&PeerMessage::HandshakeFailure(
+                        self.my_node_info.clone(),
+                        HandshakeFailureReason::ProtocolVersionMismatch {
+                            version: PROTOCOL_VERSION,
+                            oldest_supported_version: PEER_MIN_ALLOWED_PROTOCOL_VERSION,
+                        },
+                    ));
+                    Err(err)
+                }
+            }
+        } else if self.protocol_buffers_supported {
+            return PeerMessage::deserialize(crate::network_protocol::Mode::Proto,msg);
+        } else {
+            return PeerMessage::deserialize(crate::network_protocol::Mode::Proto,msg);
         }
     }
 
@@ -161,7 +190,19 @@ impl PeerActor {
         }
     }
 
-    fn send_message(&mut self, msg: &PeerMessage) -> anyhow::Result<()> {
+    fn send_message(&mut self, msg :&PeerMessage) -> anyhow::Result<()> {
+        if self.peer_status==PeerStatus::Connecting {
+            self.send_message_by_mode(msg,crate::network_protocol::Mode::Proto)?;
+            self.send_message_by_mode(msg,crate::network_protocol::Mode::Borsh)?;
+        } else if self.protocol_buffers_supported {
+            self.send_message_by_mode(msg,crate::network_protocol::Mode::Proto)?;
+        } else {
+            self.send_message_by_mode(msg,crate::network_protocol::Mode::Borsh)?;
+        }
+        Ok(())
+    }
+
+    fn send_message_by_mode(&mut self, msg: &PeerMessage, mode : crate::network_protocol::Mode) -> anyhow::Result<()> {
         // Skip sending block and headers if we received it or header from this peer.
         // Record block requests in tracker.
         match msg {
@@ -170,7 +211,7 @@ impl PeerActor {
             _ => (),
         };
 
-        let bytes = msg.serialize(crate::network_protocol::Mode::Borsh)?;
+        let bytes = msg.serialize(mode)?;
         // error!(target: "network", "Error converting message to bytes: {}", err),
         self.tracker.increment_sent(bytes.len() as u64);
         let bytes_len = bytes.len();
@@ -623,26 +664,15 @@ impl StreamHandler<Result<Vec<u8>, ReasonForBan>> for PeerActor {
         // as long as it travels to PeerManager, etc.
 
         self.update_stats_on_receiving_message(msg.len());
-        let peer_msg = match PeerMessage::deserialize(crate::network_protocol::Mode::Borsh,&msg) {
+        let peer_msg = match self.parse_message(&msg) {
             Ok(msg) => msg,
             Err(err) => {
                 debug!(target: "network", "Received invalid data {:?} from {}: {}", logging::pretty_vec(&msg), self.peer_info, err);
-                if self.peer_status==PeerStatus::Connecting {
-                    self.send_message_or_log(&PeerMessage::HandshakeFailure(
-                        self.my_node_info.clone(),
-                        HandshakeFailureReason::ProtocolVersionMismatch {
-                            version: PROTOCOL_VERSION,
-                            oldest_supported_version: PEER_MIN_ALLOWED_PROTOCOL_VERSION,
-                        },
-                    ));
-                }
                 return;
             }
         };
 
-        if self.should_we_drop_msg(&peer_msg) {
-           return; 
-        }
+        if self.should_we_drop_msg(&peer_msg) { return; }
 
         // Drop duplicated messages routed within DROP_DUPLICATED_MESSAGES_PERIOD ms
         if let PeerMessage::Routed(msg) = &peer_msg {
