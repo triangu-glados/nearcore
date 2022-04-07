@@ -164,7 +164,7 @@ impl PeerActor {
                 self.protocol_buffers_supported = true;
                 return Ok(msg);
             }
-            return match PeerMessage::deserialize(crate::network_protocol::Mode::Borsh,msg) {
+            match PeerMessage::deserialize(crate::network_protocol::Mode::Borsh,msg) {
                 Ok(msg) => Ok(msg),
                 Err(err) => {
                     self.send_message_or_log(&PeerMessage::HandshakeFailure(
@@ -178,9 +178,9 @@ impl PeerActor {
                 }
             }
         } else if self.protocol_buffers_supported {
-            return PeerMessage::deserialize(crate::network_protocol::Mode::Proto,msg);
+            PeerMessage::deserialize(crate::network_protocol::Mode::Proto,msg)
         } else {
-            return PeerMessage::deserialize(crate::network_protocol::Mode::Proto,msg);
+            PeerMessage::deserialize(crate::network_protocol::Mode::Proto,msg)
         }
     }
 
@@ -588,7 +588,7 @@ impl PeerActor {
         let m = if let PeerMessage::Routed(m) = msg { m } else { return false; };
         let _ = if let RoutedMessageBody::ForwardTx(t) = &m.body { t } else { return false; };
         let r = self.txns_since_last_block.load(Ordering::Acquire);
-        return r >= MAX_TRANSACTIONS_PER_BLOCK_MESSAGE;
+        r >= MAX_TRANSACTIONS_PER_BLOCK_MESSAGE
     }
 }
 

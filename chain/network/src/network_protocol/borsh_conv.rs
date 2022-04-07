@@ -10,7 +10,7 @@ impl TryFrom<&net::Handshake> for mem::Handshake {
             oldest_supported_version: x.oldest_supported_version,
             sender_peer_id: x.sender_peer_id.clone(),
             target_peer_id: x.target_peer_id.clone(),
-            sender_listen_port: x.sender_listen_port.clone(),
+            sender_listen_port: x.sender_listen_port,
             sender_chain_info: x.sender_chain_info.clone(),
             partial_edge_info: x.partial_edge_info.clone(),
         })
@@ -67,7 +67,7 @@ impl TryFrom<&mem::Handshake> for net::Handshake {
             oldest_supported_version: x.oldest_supported_version,
             sender_peer_id: x.sender_peer_id.clone(),
             target_peer_id: x.target_peer_id.clone(),
-            sender_listen_port: x.sender_listen_port.clone(),
+            sender_listen_port: x.sender_listen_port,
             sender_chain_info: x.sender_chain_info.clone(),
             partial_edge_info: x.partial_edge_info.clone(),
         })
