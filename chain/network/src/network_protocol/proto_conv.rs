@@ -1,4 +1,4 @@
-/// Contains proto <-> network_protocol conversions. 
+/// Contains protobuf <-> network_protocol conversions. 
 use borsh::{BorshDeserialize as _, BorshSerialize as _};
 use near_network_primitives::types::{
     Edge, PartialEdgeInfo, PeerChainInfoV2, PeerInfo, RoutedMessage,
@@ -28,6 +28,15 @@ impl TryFrom<&proto::CryptoHash> for CryptoHash {
     }
 }
 
+impl TryFrom<&CryptoHash> for proto::CryptoHash {
+    type Error = anyhow::Error;
+    fn try_from(x:&CryptoHash) -> anyhow::Result<Self> {
+        Ok(Self{hash: x.0.into()})
+    }
+}
+
+//////////////////////////////////////////
+
 impl TryFrom<&proto::GenesisId> for GenesisId {
     type Error = anyhow::Error;
     fn try_from(p :&proto::GenesisId) -> anyhow::Result<Self> {
@@ -37,6 +46,18 @@ impl TryFrom<&proto::GenesisId> for GenesisId {
         })
     }
 }
+
+impl TryFrom<&GenesisId> for proto::GenesisId {
+    type Error = anyhow::Error;
+    fn try_from(x:&GenesisId) -> anyhow::Result<Self> {
+        Ok(Self{
+            chain_id: x.chain_id.clone(),
+            hash: Some((&x.hash).try_into().context("hash")?),
+        })
+    }
+}
+
+//////////////////////////////////////////
 
 impl TryFrom<&proto::PeerChainInfo> for PeerChainInfoV2 {
     type Error = anyhow::Error;
@@ -50,6 +71,20 @@ impl TryFrom<&proto::PeerChainInfo> for PeerChainInfoV2 {
     }
 }
 
+impl TryFrom<&PeerChainInfoV2> for proto::PeerChainInfo {
+    type Error = anyhow::Error;
+    fn try_from(x:&PeerChainInfoV2) -> anyhow::Result<Self> {
+        Ok(Self{
+            genesis_id: Some((&x.genesis_id).try_into().context("genesis_id")?),
+            height: x.height,
+            tracked_shards: x.tracked_shards.clone(),
+            archival: x.archival, 
+        })
+    }
+}
+
+//////////////////////////////////////////
+
 impl TryFrom<&proto::PublicKey> for PeerId {
     type Error = anyhow::Error;
     fn try_from(p :&proto::PublicKey) -> anyhow::Result<Self> {
@@ -57,12 +92,47 @@ impl TryFrom<&proto::PublicKey> for PeerId {
     } 
 }
 
+impl TryFrom<&PeerId> for proto::PublicKey {
+    type Error = anyhow::Error;
+    fn try_from(x:&PeerId) -> anyhow::Result<Self> {
+        Ok(Self{borsh: x.try_to_vec()?})
+    }
+}
+
+//////////////////////////////////////////
+
 impl TryFrom<&proto::PartialEdgeInfo> for PartialEdgeInfo {
     type Error = anyhow::Error;
     fn try_from(p :&proto::PartialEdgeInfo) -> anyhow::Result<Self> {
         Ok(Self::try_from_slice(&p.borsh)?)
     }
 }
+
+impl TryFrom<&PartialEdgeInfo> for proto::PartialEdgeInfo {
+    type Error = anyhow::Error;
+    fn try_from(x:&PartialEdgeInfo) -> anyhow::Result<Self> {
+        Ok(Self{borsh: x.try_to_vec()?})
+    }
+}
+
+//////////////////////////////////////////
+
+impl TryFrom<&PeerInfo> for proto::PeerInfo {
+    type Error = anyhow::Error;
+    fn try_from(x:&PeerInfo) -> anyhow::Result<Self> {
+        Ok(Self{borsh: x.try_to_vec()?})
+    }
+}
+
+impl TryFrom<&proto::PeerInfo> for PeerInfo {
+    type Error = anyhow::Error;
+    fn try_from(x:&proto::PeerInfo) -> anyhow::Result<Self> {
+        Ok(Self::try_from_slice(&x.borsh)?)
+    }
+}
+
+
+//////////////////////////////////////////
 
 impl TryFrom<&proto::Handshake> for Handshake {
     type Error = anyhow::Error;
@@ -82,63 +152,6 @@ impl TryFrom<&proto::Handshake> for Handshake {
     }
 }
 
-impl TryFrom<&CryptoHash> for proto::CryptoHash {
-    type Error = anyhow::Error;
-    fn try_from(x:&CryptoHash) -> anyhow::Result<Self> {
-        Ok(Self{hash: x.0.into()})
-    }
-}
-
-impl TryFrom<&PeerId> for proto::PublicKey {
-    type Error = anyhow::Error;
-    fn try_from(x:&PeerId) -> anyhow::Result<Self> {
-        Ok(Self{borsh: x.try_to_vec()?})
-    }
-}
-
-impl TryFrom<&PartialEdgeInfo> for proto::PartialEdgeInfo {
-    type Error = anyhow::Error;
-    fn try_from(x:&PartialEdgeInfo) -> anyhow::Result<Self> {
-        Ok(Self{borsh: x.try_to_vec()?})
-    }
-}
-
-impl TryFrom<&GenesisId> for proto::GenesisId {
-    type Error = anyhow::Error;
-    fn try_from(x:&GenesisId) -> anyhow::Result<Self> {
-        Ok(Self{
-            chain_id: x.chain_id.clone(),
-            hash: Some((&x.hash).try_into().context("hash")?),
-        })
-    }
-}
-
-impl TryFrom<&PeerChainInfoV2> for proto::PeerChainInfo {
-    type Error = anyhow::Error;
-    fn try_from(x:&PeerChainInfoV2) -> anyhow::Result<Self> {
-        Ok(Self{
-            genesis_id: Some((&x.genesis_id).try_into().context("genesis_id")?),
-            height: x.height,
-            tracked_shards: x.tracked_shards.clone(),
-            archival: x.archival, 
-        })
-    }
-}
-
-impl TryFrom<&PeerInfo> for proto::PeerInfo {
-    type Error = anyhow::Error;
-    fn try_from(x:&PeerInfo) -> anyhow::Result<Self> {
-        Ok(Self{borsh: x.try_to_vec()?})
-    }
-}
-
-impl TryFrom<&proto::PeerInfo> for PeerInfo {
-    type Error = anyhow::Error;
-    fn try_from(x:&proto::PeerInfo) -> anyhow::Result<Self> {
-        Ok(Self::try_from_slice(&x.borsh)?)
-    }
-}
-
 impl TryFrom<&Handshake> for proto::Handshake {
     type Error = anyhow::Error;
     fn try_from(x:&Handshake) -> anyhow::Result<Self> {
@@ -153,6 +166,8 @@ impl TryFrom<&Handshake> for proto::Handshake {
         })
     }
 }
+
+//////////////////////////////////////////
 
 impl TryFrom<(&PeerInfo,&HandshakeFailureReason)> for proto::HandshakeFailure {
     type Error = anyhow::Error;
@@ -199,6 +214,8 @@ impl TryFrom<&proto::HandshakeFailure> for (PeerInfo,HandshakeFailureReason) {
     }
 }
 
+//////////////////////////////////////////
+
 impl TryFrom<&Edge> for proto::Edge {
     type Error = anyhow::Error;
     fn try_from(x:&Edge) -> anyhow::Result<Self> {
@@ -213,6 +230,8 @@ impl TryFrom<&proto::Edge> for Edge {
     }
 }
 
+//////////////////////////////////////////
+
 impl TryFrom<&AnnounceAccount> for proto::AnnounceAccount {
     type Error = anyhow::Error;
     fn try_from(x:&AnnounceAccount) -> anyhow::Result<Self> {
@@ -226,6 +245,8 @@ impl TryFrom<&proto::AnnounceAccount> for AnnounceAccount {
         Ok(Self::try_from_slice(&x.borsh)?)
     }
 }
+
+//////////////////////////////////////////
 
 impl TryFrom<&RoutingTableUpdate> for proto::RoutingTableUpdate {
     type Error = anyhow::Error;
@@ -247,6 +268,8 @@ impl TryFrom<&proto::RoutingTableUpdate> for RoutingTableUpdate {
     }
 }
 
+//////////////////////////////////////////
+
 impl TryFrom<&proto::BlockHeader> for BlockHeader {
     type Error = anyhow::Error;
     fn try_from(x:&proto::BlockHeader) -> anyhow::Result<Self> {
@@ -261,6 +284,8 @@ impl TryFrom<&BlockHeader> for proto::BlockHeader {
     }
 }
 
+//////////////////////////////////////////
+
 impl TryFrom<&proto::Block> for Block {
     type Error = anyhow::Error;
     fn try_from(x:&proto::Block) -> anyhow::Result<Self> {
@@ -274,6 +299,8 @@ impl TryFrom<&Block> for proto::Block {
         Ok(Self{borsh:x.try_to_vec()?})
     }
 }
+
+//////////////////////////////////////////
 
 impl TryFrom<&PeerMessage> for proto::PeerMessage {
     type Error = anyhow::Error;

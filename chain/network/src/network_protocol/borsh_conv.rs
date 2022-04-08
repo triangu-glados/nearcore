@@ -1,3 +1,4 @@
+/// Contains borsh <-> network_protocol conversions. 
 use crate::network_protocol::borsh as net;
 use crate::network_protocol as mem;
 use anyhow::{bail};
@@ -17,6 +18,23 @@ impl TryFrom<&net::Handshake> for mem::Handshake {
     }
 }
 
+impl TryFrom<&mem::Handshake> for net::Handshake {
+    type Error = anyhow::Error;
+    fn try_from(x:&mem::Handshake) -> anyhow::Result<Self> {
+        Ok(Self{
+            protocol_version: x.protocol_version,
+            oldest_supported_version: x.oldest_supported_version,
+            sender_peer_id: x.sender_peer_id.clone(),
+            target_peer_id: x.target_peer_id.clone(),
+            sender_listen_port: x.sender_listen_port,
+            sender_chain_info: x.sender_chain_info.clone(),
+            partial_edge_info: x.partial_edge_info.clone(),
+        })
+    }
+}
+
+//////////////////////////////////////////
+
 impl TryFrom<&net::HandshakeFailureReason> for mem::HandshakeFailureReason {
     type Error = anyhow::Error;
     fn try_from(x:&net::HandshakeFailureReason) -> anyhow::Result<Self> {
@@ -28,6 +46,20 @@ impl TryFrom<&net::HandshakeFailureReason> for mem::HandshakeFailureReason {
         })
     }
 }
+
+impl TryFrom<&mem::HandshakeFailureReason> for net::HandshakeFailureReason {
+    type Error = anyhow::Error;
+    fn try_from(x:&mem::HandshakeFailureReason) -> anyhow::Result<Self> {
+        Ok(match x {
+            mem::HandshakeFailureReason::ProtocolVersionMismatch{version,oldest_supported_version} => 
+               net::HandshakeFailureReason::ProtocolVersionMismatch{version:*version,oldest_supported_version:*oldest_supported_version},
+            mem::HandshakeFailureReason::GenesisMismatch(genesis_id) => net::HandshakeFailureReason::GenesisMismatch(genesis_id.clone()),
+            mem::HandshakeFailureReason::InvalidTarget => net::HandshakeFailureReason::InvalidTarget,
+        })
+    }
+}
+
+//////////////////////////////////////////
 
 impl TryFrom<&net::PeerMessage> for mem::PeerMessage {
     type Error = anyhow::Error;
@@ -55,33 +87,6 @@ impl TryFrom<&net::PeerMessage> for mem::PeerMessage {
             net::PeerMessage::EpochSyncFinalizationRequest(epoch_id) => mem::PeerMessage::EpochSyncFinalizationRequest(epoch_id),
             net::PeerMessage::EpochSyncFinalizationResponse(esfr) => mem::PeerMessage::EpochSyncFinalizationResponse(esfr),
             net::PeerMessage::RoutingTableSyncV2(rs) => mem::PeerMessage::RoutingTableSyncV2(rs),
-        })
-    }
-}
-
-impl TryFrom<&mem::Handshake> for net::Handshake {
-    type Error = anyhow::Error;
-    fn try_from(x:&mem::Handshake) -> anyhow::Result<Self> {
-        Ok(Self{
-            protocol_version: x.protocol_version,
-            oldest_supported_version: x.oldest_supported_version,
-            sender_peer_id: x.sender_peer_id.clone(),
-            target_peer_id: x.target_peer_id.clone(),
-            sender_listen_port: x.sender_listen_port,
-            sender_chain_info: x.sender_chain_info.clone(),
-            partial_edge_info: x.partial_edge_info.clone(),
-        })
-    }
-}
-
-impl TryFrom<&mem::HandshakeFailureReason> for net::HandshakeFailureReason {
-    type Error = anyhow::Error;
-    fn try_from(x:&mem::HandshakeFailureReason) -> anyhow::Result<Self> {
-        Ok(match x {
-            mem::HandshakeFailureReason::ProtocolVersionMismatch{version,oldest_supported_version} => 
-               net::HandshakeFailureReason::ProtocolVersionMismatch{version:*version,oldest_supported_version:*oldest_supported_version},
-            mem::HandshakeFailureReason::GenesisMismatch(genesis_id) => net::HandshakeFailureReason::GenesisMismatch(genesis_id.clone()),
-            mem::HandshakeFailureReason::InvalidTarget => net::HandshakeFailureReason::InvalidTarget,
         })
     }
 }
