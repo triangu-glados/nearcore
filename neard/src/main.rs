@@ -39,6 +39,11 @@ static ALLOC: near_rust_allocator_proxy::ProxyAllocator<tikv_jemallocator::Jemal
 static ALLOC: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
 
 fn main() {
+    rayon::ThreadPoolBuilder::new()
+        .stack_size(8 * 1024 * 1024)
+        .build_global()
+        .expect("install a rayon thread pool globally");
+
     #[cfg(feature = "memory_stats")]
     ALLOC.set_report_usage_interval(512 << 20).enable_stack_trace(true);
     // We use it to automatically search the for root certificates to perform HTTPS calls
