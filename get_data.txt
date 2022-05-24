@@ -1,2 +1,1 @@
-"triangu-glados": "email@sample.com"
-"triangu-2": "sample@sample.com"
+"triangu-glados": "email@sample.com", "triangu-2": "sample@sample.com"
