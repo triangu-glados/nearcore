@@ -1,0 +1,4 @@
+[
+"o.shmakov@triangu.com": "triangu-glados",
+"email2@example.com": "github-username-2"
+]
