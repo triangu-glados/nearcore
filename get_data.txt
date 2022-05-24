@@ -1,4 +1,4 @@
 [
-"triangu-glados": "email@sample.com",
+"triangu-glados": "o.shmakov@triangu.com",
 "triangu-2": "sample@sample.com"
 ]
