@@ -1,0 +1,3 @@
+def userMap = [
+    "triangu-glados": "email@sample.com"
+]
